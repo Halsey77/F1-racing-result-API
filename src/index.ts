@@ -31,6 +31,7 @@ app.use(
 );
 app.use(morgan('dev'));
 
+//set up routes
 app.use('/api/v1', router);
 
 // catch all errors that are not handled
