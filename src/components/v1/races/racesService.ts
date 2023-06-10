@@ -8,10 +8,10 @@ export async function getAllRaces(year: number, grandpix: string, place: string)
             $lte: new Date(year, 11, 31)
         },
         grandpix: !grandpix ? undefined : {
-            $regex: grandpix.toLowerCase(),
+            $regex: new RegExp(grandpix, 'i')
         },
         place: !place ? undefined : {
-            $regex: place.toLowerCase(),
+            $regex: new RegExp(place, 'i')
         }
     });
 
