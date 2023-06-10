@@ -1,5 +1,10 @@
+import {HttpCodes} from "./api";
+
 export class BaseError extends Error {
-    public httpCode: number;
+    public readonly name: string;
+    public readonly httpCode: HttpCodes;
+    public readonly message: string;
+
     constructor(name: string, httpCode: number, message: string) {
         super(message);
 

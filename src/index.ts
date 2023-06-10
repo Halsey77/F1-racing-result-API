@@ -11,14 +11,13 @@ import { connectToDB } from "./database";
 import morgan from "morgan";
 import router from "./routes/v1";
 
-
 //set up express
 const app: Application = express();
 const port: number = 3000;
 const cache = apicache.middleware;
 
 //set up middleware
-app.use(cache('1 day'));
+// app.use(cache('1 day')); //TODO: enable caching
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
