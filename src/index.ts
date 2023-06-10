@@ -11,7 +11,6 @@ import { connectToDB } from "./database";
 import morgan from "morgan";
 import router from "./routes/v1";
 
-
 //set up express
 const app: Application = express();
 const port: number = 3000;
