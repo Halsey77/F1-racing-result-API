@@ -14,5 +14,5 @@ const racesSchema: Schema<Race> = new mongoose.Schema({
     collection: "races"
 });
 
-const RaceModel: Model<Race> = model<Race>('Race', racesSchema);
-export default RaceModel;
+const raceModel: Model<Race> = model<Race>('Race', racesSchema);
+export default raceModel;
