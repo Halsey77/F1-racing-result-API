@@ -1,7 +1,7 @@
 import racesModel from "../../../database/models/races.model";
 import removeUndefinedKeysFromFilter from "../../../util/removeUndefinedKeysFromFilter";
 
-export async function getAllRaces(year: number, grandpix: string, place: string) {
+export async function getAllRaces(year?: number, grandpix?: string, place?: string) {
     const filter = removeUndefinedKeysFromFilter({
         date: !year ? undefined : {
             $gte: new Date(year, 0, 1),

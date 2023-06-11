@@ -1,4 +1,4 @@
-import * as racesService from './racesService';
+import * as racesService from './races.service';
 import {HttpCodes} from "../../../errors/api";
 
 export async function getAllRaces(req, res) {
