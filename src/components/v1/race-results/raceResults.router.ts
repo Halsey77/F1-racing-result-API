@@ -4,5 +4,6 @@ import response from "../../../errors/reponses";
 
 const router = express.Router();
 
-router.post('/insert', response(raceResultsController.insertData));
+router.get('/:year', response(raceResultsController.getRaceResultsOfYear));
+
 export default router;

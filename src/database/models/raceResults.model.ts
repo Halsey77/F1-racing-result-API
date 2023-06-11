@@ -1,5 +1,14 @@
 import mongoose, {Model, Schema} from "mongoose";
 
+export interface YearlyRaceResult {
+    grandprix: string,
+    date: Date,
+    winner: string,
+    car: string,
+    laps: number,
+    time: string,
+}
+
 export interface RaceResult {
     raceId: string,
     pos: string,
@@ -24,6 +33,4 @@ const raceResultsSchema: Schema<RaceResult> = new mongoose.Schema({
     collection: "race_results"
 });
 
-const raceResultModel: Model<RaceResult> = mongoose.model<RaceResult>('RaceResult', raceResultsSchema);
-
-export default raceResultModel;
+export const raceResultModel: Model<RaceResult> = mongoose.model<RaceResult>('RaceResult', raceResultsSchema);

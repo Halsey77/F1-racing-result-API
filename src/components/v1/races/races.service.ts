@@ -15,5 +15,5 @@ export async function getAllRaces(year?: number, grandpix?: string, place?: stri
         }
     });
 
-    return await racesModel.find(filter).exec();
+    return await racesModel.find(filter).lean().exec();
 }
