@@ -1,29 +1,28 @@
-import {data} from './data.dev';
 import * as racesService from '../races/races.service';
-import {raceResultModel, RaceResult, YearlyRaceResult} from "../../../database/models/raceResults.model";
+import {RaceResult, raceResultModel, YearlyRaceResult} from "../../../database/models/raceResults.model";
 import {Race} from "../../../database/models/races.model";
 import {FlattenMaps, Types} from "mongoose";
+import {APIError, HttpCodes} from "../../../errors/api";
+import {sortDate, sortNumber, sortString} from "../../../util/sort";
 
-interface GrandpixResult extends Omit<RaceResult, 'raceId'> {}
+interface GrandprixResult extends Omit<RaceResult, 'raceId'> {
+}
 
-export async function getRaceResultsOfYearAndGrandprix(year: any, grandprix: any): Promise<GrandpixResult[]> {
-    const races = await racesService.getAllRaces(year, grandprix);
-    const race = races.find(r => {
-        return r.grandpix.toLowerCase().trim() === grandprix;
-    })
-    if(race === undefined) return [];
+export async function getRaceResultsOfYearAndGrandprix(year: any, grandprix: any): Promise<GrandprixResult[]> {
+    const race = await racesService.findOneRace(year, grandprix);
+    if (!race) return [];
 
-    return await raceResultModel.find({ raceId: race._id }).lean().select('-raceId -__v').exec();
+    return await raceResultModel.find({raceId: race._id}).lean().select('-raceId -__v').exec();
 }
 
 export async function getRaceResultsOfYear(year: number): Promise<YearlyRaceResult[]> {
     const races = await racesService.getAllRaces(year);
-    if(races.length === 0) {
+    if (races.length === 0) {
         return [];
     }
 
     let results: YearlyRaceResult[] = [];
-    for(const r of races) {
+    for (const r of races) {
         const winner = await findWinnerOfRace(r);
         results.push(winner);
     }
@@ -31,7 +30,9 @@ export async function getRaceResultsOfYear(year: number): Promise<YearlyRaceResu
     return results;
 }
 
-async function findWinnerOfRace(race:  FlattenMaps<Race> & {_id: Types.ObjectId}): Promise<YearlyRaceResult & {_id: Types.ObjectId}> {
+async function findWinnerOfRace(race: FlattenMaps<Race> & { _id: Types.ObjectId }): Promise<YearlyRaceResult & {
+    _id: Types.ObjectId
+}> {
     const winner = await raceResultModel.findOne({
         raceId: race._id,
         pos: '1'
@@ -48,24 +49,50 @@ async function findWinnerOfRace(race:  FlattenMaps<Race> & {_id: Types.ObjectId}
     };
 }
 
-
-//TODO: remove this function
-export async function insertData() {
-    const resultDocs = [];
-    for(const d of data) {
-        //find raceId
-        const race = await racesService.getAllRaces(d.year, d.grandpix);
-        const raceId = race[0]._id;
-
-        //insert results with raceId
-        const results = d.results.map(r => {
-            return {
-                raceId: raceId,
-                ...r
-            }
-        });
-        const inserted = await raceResultModel.insertMany(results);
-        resultDocs.push(...inserted);
+const grandprixSortOptions: Map<string, string> = new Map<string, string>([
+    ['pos', 'number'],
+    ['no', 'number'],
+    ['driver', 'string'],
+    ['car', 'string'],
+    ['laps', 'number'],
+    ['time', 'string'],
+    ['pts', 'number']
+]);
+export function sortGrandprixResults(results: GrandprixResult[], sort: string): GrandprixResult[] {
+    const [sortOption, direction] = sort.split(':');
+    if (!grandprixSortOptions.has(sortOption)) {
+        throw new APIError(HttpCodes.BAD_REQUEST, `Invalid sort option: ${sortOption}`);
     }
-    return resultDocs;
+    return sortResults(direction, results, sortOption, grandprixSortOptions.get(sortOption));
+}
+
+const yearlyResultsSortOptions: Map<string, string> = new Map<string, string>([
+    ['grandprix', 'string'],
+    ['date', 'date'],
+    ['winner', 'string'],
+    ['car', 'string'],
+    ['laps', 'number'],
+    ['time', 'string']
+]);
+export function sortYearlyResults(results: YearlyRaceResult[], sort: string): YearlyRaceResult[] {
+    const [sortOption, direction] = sort.split(':');
+    if (!yearlyResultsSortOptions.has(sortOption)) {
+        throw new APIError(HttpCodes.BAD_REQUEST, `Invalid sort option: ${sortOption}`);
+    }
+    return sortResults(direction, results, sortOption, yearlyResultsSortOptions.get(sortOption));
+}
+
+function sortResults(direction: string, results: any[], sortOption: string, sortType: string): any[] {
+    if (direction !== 'asc' && direction !== 'desc') {
+        throw new APIError(HttpCodes.BAD_REQUEST, `Invalid sort direction: ${direction}`);
+    }
+
+    return results.sort((a, b) => {
+        if(sortType === 'number') {
+            return sortNumber(direction, a[sortOption], b[sortOption]);
+        } else if(sortType === 'date') {
+            return sortDate(direction, a[sortOption], b[sortOption]);
+        }
+        return sortString(direction, a[sortOption], b[sortOption]);
+    });
 }
