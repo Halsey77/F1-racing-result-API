@@ -1,4 +1,4 @@
-import { data } from './data';
+import { data } from './data.dev';
 import * as racesService from '../races/races.service';
 import raceResultModel from "../../../database/models/raceResults.model";
 
