@@ -7,6 +7,6 @@ const router: Router = express.Router();
 
 router.use('/races', racesRouter);
 router.use('/race-results', raceResultsRouter);
-router.use('/driver-standings-year', driverStandingAllRouter);
+router.use('/yearly-driver-standings', driverStandingAllRouter);
 router.use('/driver-standings', driverStandingRouter);
 export default router;
