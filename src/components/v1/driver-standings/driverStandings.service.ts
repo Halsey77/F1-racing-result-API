@@ -25,15 +25,10 @@ export async function getDriverStandings(driver: string, query: DriverStandingQu
             $regex: new RegExp(carName, "i")
         },
     });
+    const [sortField, sortDirection] = query.sort.split(':') || ['date', 'desc'];
 
-    let sort;
-    if(!query.sort) {
-        sort = {date: -1};
-    } else {
-        const [sortField, sortDirection] = query.sort.split(':');
-        sort = {[sortField]: sortDirection === 'asc' ? 1 : -1};
-    }
-
-    return await driverStandingModel.find(filter).lean().sort(sort).select('-__v').exec();
+    return await driverStandingModel.find(filter).lean().sort({
+        [sortField]: sortDirection === 'asc' ? 1 : -1
+    }).select('-__v').exec();
 }
 
