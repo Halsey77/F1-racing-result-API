@@ -1,5 +1,5 @@
 import * as service from './driverStandingAll.service';
-import {HttpCodes} from "../../../errors/api";
+import {APIError, HttpCodes} from "../../../errors/api";
 
 export interface YearlyDriverStandingsQuery {
     year?: number;
@@ -17,30 +17,18 @@ export async function getDriverStandingsOfYear(req, res) {
     //validate query
     for(const key in req.query) {
         if(!['year', 'pos', 'driver', 'nationality', 'car', 'pts', 'sort'].includes(key)) {
-            res.status(400).json({
-                error: `Query parameter '${key}' is invalid.`
-            });
-            return;
+            throw new APIError(HttpCodes.BAD_REQUEST, `Invalid query parameter: ${key}`);
         }
         if((key == 'year' && isNaN(query[key])) || (key == 'pos' && isNaN(query[key])) || (key == 'pts' && isNaN(query[key]))) {
-            res.status(400).json({
-                error: `Query parameter '${key}' must be a number.`
-            });
-            return;
+            throw new APIError(HttpCodes.BAD_REQUEST, `Invalid value ${query[key]} of key ${key}`);
         }
         if(key == 'sort') {
             const [sortField, sortDirection] = req.query.sort.split(':');
             if(!['year', 'pos', 'driver', 'nationality', 'car', 'pts'].includes(sortField)) {
-                res.status(HttpCodes.BAD_REQUEST).json({
-                    message: `Invalid sort field: ${sortField}`
-                });
-                return;
+                throw new APIError(HttpCodes.BAD_REQUEST, `Invalid sort field: ${sortField}`);
             }
             if(!['asc', 'desc'].includes(sortDirection)) {
-                res.status(HttpCodes.BAD_REQUEST).json({
-                    message: `Invalid sort direction: ${sortDirection}`
-                });
-                return;
+                throw new APIError(HttpCodes.BAD_REQUEST, `Invalid sort direction: ${sortDirection}`);
             }
         }
     }

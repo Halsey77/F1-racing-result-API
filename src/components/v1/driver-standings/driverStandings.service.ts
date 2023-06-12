@@ -25,7 +25,7 @@ export async function getDriverStandings(driver: string, query: DriverStandingQu
             $regex: new RegExp(carName, "i")
         },
     });
-    const [sortField, sortDirection] = query.sort.split(':') || ['date', 'desc'];
+    const [sortField, sortDirection] = query.sort?.split(':') || ['date', 'desc'];
 
     return await driverStandingModel.find(filter).lean().sort({
         [sortField]: sortDirection === 'asc' ? 1 : -1
