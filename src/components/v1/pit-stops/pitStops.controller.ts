@@ -13,6 +13,9 @@ export interface PitStopsQuery {
     timeOfDay?: string;
     time?: string;
     total?: string;
+
+    page?: string;
+    limit?: string;
 }
 
 export const pitStopQueryValidation = [
@@ -26,6 +29,8 @@ export const pitStopQueryValidation = [
     query('timeOfDay').optional().escape().matches('^(\\[\\D+\\])?\\d{2}:\\d{2}:\\d{2}$', 'g').withMessage('invalid format'),
     query('time').optional().escape().matches('^(\\[\\D+\\])?\\d+(.\\d+)?$', 'g').withMessage('invalid format'),
     query('total').optional().escape().isString().withMessage('Total must be a string'),
+    query('page').if(query('limit').not().exists()).not().exists().withMessage('Limit must be specified').optional().isInt().withMessage('Page must be an integer').toInt(),
+    query('limit').if(query('page').not().exists()).not().exists().withMessage('Page must be specified').optional().isInt().withMessage('Limit must be an integer').toInt()
 ];
 
 export async function getPitStops(req, res) {
@@ -36,7 +41,7 @@ export async function getPitStops(req, res) {
         throw new APIError(HttpCodes.BAD_REQUEST, message);
     }
 
-    const data = matchedData(req, { includeOptionals: true }) as PitStopsQuery;
-    const results = await service.getPitStopsFromDB(data);
+    const queryData = matchedData(req, { includeOptionals: true }) as PitStopsQuery;
+    const results = await service.getPitStopsFromDB(queryData);
     res.status(HttpCodes.OK).json(results);
 }

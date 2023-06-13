@@ -10,7 +10,14 @@ interface PitStopResult extends Omit<PitStop, 'raceId'>{
     year: number;
 }
 
-export async function getPitStopsFromDB(query: PitStopsQuery): Promise<PitStopResult[]> {
+interface PaginatedPitStops {
+    data: PitStopResult[];
+    limit: number;
+    totalPages: number;
+    totalResults: number;
+}
+
+export async function getPitStopsFromDB(query: PitStopsQuery): Promise<PitStopResult[] | PaginatedPitStops> {
     const races = await racesService.getAllRaces(query.year, query.grandprix);
     if(races.length === 0) return [];
 
@@ -28,6 +35,22 @@ export async function getPitStopsFromDB(query: PitStopsQuery): Promise<PitStopRe
         });
         results.push(...pitStopResults);
     }
+
+    if(query.page && query.limit) {
+        const start = (parseInt(query.page) - 1) * parseInt(query.limit);
+        const end = start + parseInt(query.limit);
+        const totalPages = Math.ceil(results.length / parseInt(query.limit));
+        const totalResults = results.length;
+        results = results.slice(start, end);
+
+        return {
+            data: results,
+            limit: parseInt(query.limit),
+            totalPages,
+            totalResults
+        };
+    }
+
     return results;
 }
 
