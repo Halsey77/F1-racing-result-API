@@ -3,6 +3,7 @@ import {PitStopsQuery} from "./pitStops.controller";
 import * as racesService from "../races/races.service";
 import {Types} from "mongoose";
 import removeUndefinedKeysFromFilter from "../../../util/removeUndefinedKeysFromFilter";
+import {createCompareSortOptionForNumber, createCompareSortOptionForTime} from "../../../util/sort";
 
 interface PitStopResult extends Omit<PitStop, 'raceId'>{
     grandprix: string;
@@ -33,17 +34,17 @@ export async function getPitStopsFromDB(query: PitStopsQuery): Promise<PitStopRe
 async function findPitStopsByRaceId(raceId: Types.ObjectId, query: PitStopsQuery) {
     const filter = removeUndefinedKeysFromFilter({
         raceId: raceId,
-        stops: query.stops,
-        no: query.no,
+        stops: query.stops && createCompareSortOptionForNumber(query.stops),
+        no: query.no && createCompareSortOptionForNumber(query.no),
         driver: query.driver && {
             $regex: new RegExp(query.driver.split('-').join(' '), 'i'),
         } ,
         car: query.car && {
             $regex: new RegExp(query.car.split('-').join(' '), 'i'),
         },
-        lap: query.lap,
-        timeOfDay: query.timeOfDay,
-        time: query.time,
+        lap: query.lap && createCompareSortOptionForNumber(query.lap),
+        timeOfDay: query.timeOfDay && createCompareSortOptionForTime(query.timeOfDay),
+        time: query.time && createCompareSortOptionForNumber(query.time),
         total: query.total
     });
 
