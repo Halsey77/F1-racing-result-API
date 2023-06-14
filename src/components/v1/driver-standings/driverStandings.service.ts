@@ -1,6 +1,7 @@
 import {driverStandingModel} from "../../../database/models/driverStanding.model";
 import {DriverStandingQuery} from "./driverStandings.controller";
 import removeUndefinedKeysFromFilter from "../../../util/removeUndefinedKeysFromFilter";
+import {createCompareSortOptionForNumber} from "../../../util/sort";
 
 export async function getDriverStandings(driver: string, query: DriverStandingQuery) {
     const driverName = driver.split('-').join(' ');
@@ -20,7 +21,7 @@ export async function getDriverStandings(driver: string, query: DriverStandingQu
         racepos: !query.racepos ? undefined : {
             $regex: new RegExp(query.racepos, "i")
         },
-        pts: !query.pts ? undefined : query.pts,
+        pts: query.pts && createCompareSortOptionForNumber(query.pts),
         car: !query.car ? undefined : {
             $regex: new RegExp(carName, "i")
         },

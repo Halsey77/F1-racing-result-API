@@ -15,9 +15,9 @@ export const driverStandingsQueryValidation = [
     query('year').optional().isInt({min: 1990}).withMessage('Year must be a number greater than 1990'),
     query('grandprix').optional().escape().isString().withMessage('Grand Prix must be a string'),
     query('racepos').optional().isInt().equals('DNF').withMessage('Race position must be a number or DNF'),
-    query('pts').optional().isInt().withMessage('Points must be a number'),
+    query('pts').optional().matches('^(\\[\\D+\\])?\\d+$', 'g').withMessage('invalid format'),
     query('car').optional().escape().isString().withMessage('Car must be a string'),
-    query('sort').optional().escape().matches('^\\D+:((asc)|(desc))$', 'g').withMessage('invalid sort format'),
+    query('sort').optional().escape().matches('^(year|grandprix|racepos|pts|car):(asc|desc)$', 'g').withMessage('invalid sort format'),
 ];
 
 export async function getDriverStandings(req, res) {
