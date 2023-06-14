@@ -4,21 +4,21 @@ import {FieldValidationError, matchedData, query, validationResult} from "expres
 
 export interface YearlyDriverStandingsQuery {
     year?: number;
-    pos?: number;
+    pos?: string;
     driver?: string;
     nationality?: string;
     car?: string;
-    pts?: number;
+    pts?: string;
     sort?: string;
 }
 
 export const yearlyDriverStandingsQueryValidation = [
     query('year').optional().escape().isInt({min: 1990}).withMessage('Year must be a number greater than 1990'),
-    query('pos').optional().escape().isInt({min: 1}).withMessage('Position must be a number greater than 0'),
+    query('pos').optional().escape().matches('^(\\[\\D+\\])?\\d+$', 'g').withMessage('invalid format'),
     query('driver').optional().escape().isString().withMessage('Driver name must be a string').toLowerCase(),
     query('nationality').optional().escape().isString().withMessage('Nationality must be a string').toLowerCase(),
     query('car').optional().escape().isString().withMessage('Car name must be a string').toLowerCase(),
-    query('pts').optional().escape().isInt({min: 0}).withMessage('Points must be a number greater than or equal 0'),
+    query('pts').optional().escape().matches('^(\\[\\D+\\])?\\d+$', 'g').withMessage('invalid format'),
     query('sort').optional().escape().matches('^(year|pos|driver|nationality|car|pts):(asc|desc)$', 'g').withMessage('invalid sort format')
 ];
 
