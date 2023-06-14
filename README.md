@@ -13,7 +13,7 @@ You can find more information and documentation on how to use the API down below
 
 ## API documentation
 
-The base URL of the API is `https://f1-racing-result-api.herokuapp.com/api/v1/`.  
+Web service is available at the base URL of the API: `https://f1-racing-results.onrender.com/api/v1/`.  
 The API documentation is available at [link](https://documenter.getpostman.com/view/23547388/2s93sf2WkT)
 
 ## Project structure
