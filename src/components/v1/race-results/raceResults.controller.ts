@@ -1,7 +1,6 @@
 import {HttpCodes} from "../../../errors/api";
 import * as raceResultsService from './raceResults.service';
 
-//TODO: add sort options
 export async function getRaceResultsOfYear(req, res) {
     const { year } = req.params;
     const { grandprix, sort } = req.query;
