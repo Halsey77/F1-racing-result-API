@@ -1,6 +1,7 @@
 import {driverStandingsAllModel} from "../../../database/models/driverStandingsAll.model";
 import {YearlyDriverStandingsQuery} from "./driverStandingAll.controller";
 import removeUndefinedKeysFromFilter from "../../../util/removeUndefinedKeysFromFilter";
+import {createCompareSortOptionForNumber} from "../../../util/sort";
 
 export async function getDriverStandingsOfYear(query: YearlyDriverStandingsQuery) {
     const driverName = query.driver?.split('-').join(' ');
@@ -9,7 +10,7 @@ export async function getDriverStandingsOfYear(query: YearlyDriverStandingsQuery
 
     const filter = removeUndefinedKeysFromFilter({
         year: query.year,
-        pos: query.pos,
+        pos: query.pos && createCompareSortOptionForNumber(query.pos),
         driver: !query.driver ? undefined : {
             $regex: new RegExp(driverName, 'i'),
         },
@@ -19,7 +20,7 @@ export async function getDriverStandingsOfYear(query: YearlyDriverStandingsQuery
         car: !query.car ? undefined : {
             $regex: new RegExp(carName, 'i'),
         },
-        pts: query.pts,
+        pts: query.pts && createCompareSortOptionForNumber(query.pts),
     });
 
     return await driverStandingsAllModel.find(filter).sort({
