@@ -1,5 +1,6 @@
 import * as service from './driverStandings.service';
 import {APIError, HttpCodes} from "../../../errors/api";
+import {FieldValidationError, matchedData, query, validationResult} from "express-validator";
 
 export interface DriverStandingQuery {
     year?: string,
@@ -10,30 +11,25 @@ export interface DriverStandingQuery {
     sort?: string,
 }
 
-export async function getDriverStandings(req, res) {
-    const driver: string = req.params.driver;
-    const query: DriverStandingQuery = req.query;
+export const driverStandingsQueryValidation = [
+    query('year').optional().isInt({min: 1990}).withMessage('Year must be a number greater than 1990'),
+    query('grandprix').optional().escape().isString().withMessage('Grand Prix must be a string'),
+    query('racepos').optional().isInt().equals('DNF').withMessage('Race position must be a number or DNF'),
+    query('pts').optional().isInt().withMessage('Points must be a number'),
+    query('car').optional().escape().isString().withMessage('Car must be a string'),
+    query('sort').optional().escape().matches('^\\D+:((asc)|(desc))$', 'g').withMessage('invalid sort format'),
+];
 
-    // Validate query parameters
-    for(const key in req.query) {
-        if(!['year', 'grandprix', 'racepos', 'pts', 'car', 'sort'].includes(key)) {
-            throw new APIError(HttpCodes.BAD_REQUEST, `Invalid query parameter: ${key}`);
-        }
-        if(key === 'sort') {
-            const [sortField, sortDirection] = req.query.sort.split(':');
-            if(!['date', 'grandprix', 'racepos', 'pts', 'car'].includes(sortField)) {
-                throw new APIError(HttpCodes.BAD_REQUEST, `Invalid sort field: ${sortField}`);
-            }
-            if(!['asc', 'desc'].includes(sortDirection)) {
-                throw new APIError(HttpCodes.BAD_REQUEST, `Invalid sort direction: ${sortDirection}`);
-            }
-        }
-        if(key === 'year') {
-            if(isNaN(Number(req.query.year))) {
-                throw new APIError(HttpCodes.BAD_REQUEST, `Invalid year ${req.query.year}}`);
-            }
-        }
+export async function getDriverStandings(req, res) {
+    const validationErrors = validationResult(req);
+    if(!validationErrors.isEmpty()) {
+        const error = validationErrors.array({ onlyFirstError: true })[0] as FieldValidationError;
+        const message = `Validation error for ${error.path}: ${error.msg}`;
+        throw new APIError(HttpCodes.BAD_REQUEST, message);
     }
+
+    const driver: string = req.params.driver;
+    const query = matchedData(req, { includeOptionals: true }) as DriverStandingQuery;
 
     const driverStandings = await service.getDriverStandings(driver, query);
     res.status(HttpCodes.OK).json(driverStandings);

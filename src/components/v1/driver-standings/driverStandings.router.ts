@@ -4,6 +4,6 @@ import * as controller from "./driverStandings.controller";
 
 const router = express.Router();
 
-router.get('/:driver', response(controller.getDriverStandings))
+router.get('/:driver', controller.driverStandingsQueryValidation, response(controller.getDriverStandings))
 
 export default router;
