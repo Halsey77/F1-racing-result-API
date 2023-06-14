@@ -4,6 +4,6 @@ import * as controller from "./driverStandingAll.controller";
 
 const router = express.Router();
 
-router.get('/', response(controller.getDriverStandingsOfYear));
+router.get('/', controller.yearlyDriverStandingsQueryValidation, response(controller.getDriverStandingsOfYear));
 
 export default router;
